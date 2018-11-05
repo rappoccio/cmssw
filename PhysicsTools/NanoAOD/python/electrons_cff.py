@@ -328,6 +328,7 @@ run2_nanoAOD_94X2016.toModify(electronTable.variables,
     mvaFall17noIso_WPL = Var("electronID('mvaEleID-Fall17-noIso-V1-wpLoose')",bool,doc="MVA Fall17 V1 noIso ID loose WP"),
 )
 run2_miniAOD_80XLegacy.toModify(electronTable.variables,
+    cutBased = Var("userInt('cutbasedID_veto')+userInt('cutbasedID_loose')+userInt('cutbasedID_medium')+userInt('cutbasedID_tight')",int,doc="cut-based Summer16 ID (0:fail, 1:veto, 2:loose, 3:medium, 4:tight)"),
     cutBased_HLTPreSel = Var("userInt('cutbasedID_HLT')",int,doc="cut-based HLT pre-selection ID"),
     cutBased_Spring15 = Var("userInt('cutbasedID_Spring15_veto')+userInt('cutbasedID_Spring15_loose')+userInt('cutbasedID_Spring15_medium')+userInt('cutbasedID_Spring15_tight')",int,doc="cut-based Spring15 ID (0:fail, 1:veto, 2:loose, 3:medium, 4:tight)"),
     mvaSpring16GP = Var("userFloat('mvaSpring16GP')",float,doc="MVA general-purpose ID score"),
