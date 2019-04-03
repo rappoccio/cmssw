@@ -15,6 +15,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include "CommonTools/UtilAlgos/interface/StringCutObjectSelector.h"
 
@@ -34,9 +35,11 @@ namespace pat {
     private:
       edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection>> pf2pc_;
       edm::EDGetTokenT<edm::ValueMap<reco::CandidatePtr>> pf2pcAny_;
+      edm::EDGetTokenT<edm::Association<pat::PackedGenParticleCollection>> gen2pc_;
+      edm::EDGetTokenT<edm::ValueMap<reco::CandidatePtr>> gen2pcAny_;    
       const edm::EDGetTokenT<edm::View<pat::Jet> >  jets_;
       const StringCutObjectSelector<pat::Jet> dropJetVars_,dropDaughters_,rekeyDaughters_,dropTrackRefs_,dropSpecific_,dropTagInfos_;
-      const bool modifyJet_, mayNeedDaughterMap_, mixedDaughters_;
+      const bool modifyJet_, mayNeedDaughterMap_, mixedDaughters_, inputIsGenJets_;
       std::unique_ptr<pat::ObjectModifier<pat::Jet> > jetModifier_;
   };
 
@@ -53,13 +56,20 @@ pat::PATJetSlimmer::PATJetSlimmer(const edm::ParameterSet & iConfig) :
     dropTagInfos_(iConfig.getParameter<std::string>("dropTagInfos")),
     modifyJet_(iConfig.getParameter<bool>("modifyJets")),
     mayNeedDaughterMap_(iConfig.getParameter<std::string>("dropDaughters") != "1" && iConfig.getParameter<std::string>("rekeyDaughters") != "0"),
-    mixedDaughters_(iConfig.getParameter<bool>("mixedDaughters"))
+    mixedDaughters_(iConfig.getParameter<bool>("mixedDaughters")),
+    inputIsGenJets_(iConfig.getParameter<bool>("inputIsGenJets"))
 {
     if (mayNeedDaughterMap_) {
         if (mixedDaughters_) {
+	  if ( !inputIsGenJets_ )
             pf2pcAny_ = consumes<edm::ValueMap<reco::CandidatePtr> >(iConfig.getParameter<edm::InputTag>("packedPFCandidates"));
+	  else
+	    gen2pcAny_ = consumes<edm::ValueMap<reco::CandidatePtr> >(iConfig.getParameter<edm::InputTag>("packedGenParticles"));
         } else {
+	  if ( !inputIsGenJets_ )
             pf2pc_ = consumes<edm::Association<pat::PackedCandidateCollection> >(iConfig.getParameter<edm::InputTag>("packedPFCandidates"));
+	  else
+	    gen2pc_ = consumes<edm::Association<pat::PackedGenParticleCollection> >(iConfig.getParameter<edm::InputTag>("packedGenParticles"));
         }
     }
     if( modifyJet_ ) {
@@ -83,12 +93,24 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
     iEvent.getByToken(jets_, src);
     Handle<edm::Association<pat::PackedCandidateCollection> > pf2pc;
     Handle<edm::ValueMap<reco::CandidatePtr> > pf2pcAny;
-    if (mayNeedDaughterMap_) {
+
+    Handle<edm::Association<pat::PackedGenParticleCollection> > gen2pc;
+    Handle<edm::ValueMap<reco::CandidatePtr> > gen2pcAny;
+
+    if ( !inputIsGenJets_ ) {
+      if (mayNeedDaughterMap_) {
         if (mixedDaughters_) {
-            iEvent.getByToken(pf2pcAny_,pf2pcAny);
+	  iEvent.getByToken(pf2pcAny_,pf2pcAny);
         } else {
-            iEvent.getByToken(pf2pc_,pf2pc);
+	  iEvent.getByToken(pf2pc_,pf2pc);
         }
+      }
+    } else { // input is gen jets
+      if (mixedDaughters_) {
+	iEvent.getByToken(gen2pcAny_,gen2pcAny);
+      } else {
+	iEvent.getByToken(gen2pc_,gen2pc);
+      }      
     }
 	
     auto out = std::make_unique<std::vector<pat::Jet>>();
@@ -120,6 +142,7 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
 		    jet.clearDaughters();
 		    jet.pfCandidatesFwdPtr_.clear();
 		    jet.caloTowersFwdPtr_.clear();
+		    jet.genParticlesFwdPtr_.clear();
 	    } else if (rekeyDaughters_(*it)) {  //rekey
 		    //copy old 
 		    reco::CompositePtrCandidate::daughters old = jet.daughterPtrVector();
@@ -127,7 +150,10 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
                     if (mixedDaughters_) {
                         std::vector<reco::CandidatePtr> ptrs;	    
                         for(const reco::CandidatePtr &oldptr : old) {
+			  if ( inputIsGenJets_) 
                             ptrs.push_back( (*pf2pcAny)[oldptr] );
+			  else
+			    ptrs.push_back( (*gen2pcAny)[oldptr] );
                         }
                         std::sort(ptrs.begin(), ptrs.end());
                         for(const reco::CandidatePtr &newptr : ptrs) {
@@ -138,7 +164,10 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
                         for(unsigned int  i=0;i<old.size();i++)
                         {
                             //	jet.addDaughter(refToPtr((*pf2pc)[old[i]]));
+			  if ( inputIsGenJets_ )
                             ptrs[((*pf2pc)[old[i]]).key()]=refToPtr((*pf2pc)[old[i]]);
+			  else 
+			    ptrs[((*gen2pc)[old[i]]).key()]=refToPtr((*gen2pc)[old[i]]);
                         }
                         for(std::map<unsigned int,reco::CandidatePtr>::iterator itp=ptrs.begin();itp!=ptrs.end();itp++) //iterate on sorted items
                         {
@@ -149,7 +178,8 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
 	    if (dropSpecific_(*it)) {
 		    // FIXME add method in pat::Jet
 		    jet.specificCalo_.clear();    
-		    jet.specificPF_.clear();    
+		    jet.specificPF_.clear();
+		    jet.specificGen_.clear();    
 	    }
 	    //         if (dropJetCorrFactors_(*it)) {
 	    //             // FIXME add method in pat::Jet

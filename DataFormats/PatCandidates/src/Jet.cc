@@ -100,6 +100,8 @@ void Jet::tryImportSpecific(const reco::Jet& source)
     }
   } else if( type == typeid(reco::PFJet) ){
     specificPF_.push_back( (static_cast<const reco::PFJet&>(source)).getSpecific() );
+  } else if( type == typeid(reco::GenJet) ) {
+    specificGen_.push_back( (static_cast<const reco::GenJet&>(source)).getSpecific() );
   }
 }
 
@@ -188,6 +190,49 @@ std::vector<reco::PFCandidatePtr> const & Jet::getPFConstituents () const {
   return *pfCandidatesTemp_;
 }
 
+
+/// ============= GenJet methods ============
+
+reco::GenParticlePtr Jet::getGenParticle (unsigned fIndex) const {
+    if (embeddedGenParticles_) {
+      // Refactorized PAT access
+      if ( !genParticlesFwdPtr_.empty() ) {
+	return (fIndex < genParticlesFwdPtr_.size() ?
+		genParticlesFwdPtr_[fIndex].ptr() : reco::GenParticlePtr());
+      }
+      // Compatibility PAT access
+      else {
+	if ( !genParticles_.empty() ) {
+	  return (fIndex < genParticles_.size() ?
+		  reco::GenParticlePtr(&genParticles_, fIndex) : reco::GenParticlePtr());
+
+	}
+      }
+    }
+    // Non-embedded access
+    else {
+      Constituent dau = daughterPtr (fIndex);
+      const reco::GenParticle* genCandidate = dynamic_cast <const reco::GenParticle*> (dau.get());
+      if (genCandidate) {
+	return reco::GenParticlePtr(dau.id(), genCandidate, dau.key() );
+      }
+      else {
+	throw cms::Exception("Invalid Constituent") << "GenJet constituent is not of GenParticle type";
+      }
+
+    }
+
+    return reco::GenParticlePtr ();
+}
+
+std::vector<reco::GenParticlePtr> const & Jet::getGenParticles () const {
+  if ( !genParticlesTemp_.isSet() || !genParticles_.empty() ) cacheGenParticles();
+  return *genParticlesTemp_;
+}
+
+
+
+
 const reco::Candidate * Jet::daughter(size_t i) const {
   if (isCaloJet() || isJPTJet() ) {
     if ( embeddedCaloTowers_ ) {
@@ -200,6 +245,13 @@ const reco::Candidate * Jet::daughter(size_t i) const {
     if ( embeddedPFCandidates_ ) {
       if ( !pfCandidatesFwdPtr_.empty() ) return pfCandidatesFwdPtr_[i].get();
       else if ( !pfCandidates_.empty() ) return &pfCandidates_[i];
+      else return reco::Jet::daughter(i);
+    }
+  }
+  if (isGenJet()) {
+    if ( embeddedGenParticles_ ) {
+      if ( !genParticlesFwdPtr_.empty() ) return genParticlesFwdPtr_[i].get();
+      else if ( !genParticles_.empty() ) return &genParticles_[i];
       else return reco::Jet::daughter(i);
     }
   }
@@ -238,6 +290,13 @@ size_t Jet::numberOfDaughters() const {
     if ( embeddedPFCandidates_ ) {
       if ( !pfCandidatesFwdPtr_.empty() ) return pfCandidatesFwdPtr_.size();
       else if ( !pfCandidates_.empty() ) return pfCandidates_.size();
+      else return reco::Jet::numberOfDaughters();
+    }
+  }
+  if (isGenJet()) {
+    if ( embeddedGenParticles_ ) {
+      if ( !genParticlesFwdPtr_.empty() ) return genParticlesFwdPtr_.size();
+      else if ( !genParticles_.empty() ) return genParticles_.size();
       else return reco::Jet::numberOfDaughters();
     }
   }
@@ -607,6 +666,54 @@ void Jet::cachePFCandidates() const {
   }
   // Set the cache
   pfCandidatesTemp_.set(std::move(pfCandidatesTemp));
+}
+
+
+
+/// method to cache the constituents to allow "user-friendly" access
+void Jet::cacheGenParticles() const {
+
+  std::unique_ptr<std::vector<reco::GenParticlePtr>> genParticlesTemp{ new std::vector<reco::GenParticlePtr>{}};
+  // Here is where we've embedded constituents
+  if ( embeddedGenParticles_ ) {
+    // Refactorized PAT access
+    if ( !genParticlesFwdPtr_.empty() ) {
+      genParticlesTemp->reserve(genParticlesFwdPtr_.size());
+      for ( GenParticleFwdPtrCollection::const_iterator ibegin=genParticlesFwdPtr_.begin(),
+	      iend = genParticlesFwdPtr_.end(),
+	      igen = ibegin;
+	    igen != iend; ++igen ) {
+	genParticlesTemp->emplace_back( igen->ptr()  );
+      }
+    }
+    // Compatibility access
+    else if ( !genParticles_.empty() ) {
+      genParticlesTemp->reserve(genParticles_.size());
+      for ( reco::GenParticleCollection::const_iterator ibegin=genParticles_.begin(),
+	      iend = genParticles_.end(),
+	      igen = ibegin;
+	    igen != iend; ++igen ) {
+	genParticlesTemp->emplace_back( &genParticles_, igen - ibegin  );
+      }
+    }
+  }
+  // Non-embedded access
+  else {
+    const auto nDaughters = numberOfDaughters();
+    genParticlesTemp->reserve(nDaughters);
+    for ( unsigned fIndex = 0; fIndex < nDaughters; ++fIndex ) {
+      Constituent const & dau = daughterPtr (fIndex);
+      const reco::GenParticle* genCandidate = dynamic_cast <const reco::GenParticle*> (dau.get());
+      if (genCandidate) {
+	genParticlesTemp->emplace_back( dau.id(), genCandidate,dau.key() );
+      }
+      else {
+	throw cms::Exception("Invalid Constituent") << "GenJet constituent is not of GenParticle type";
+      }
+    }
+  }
+  // Set the cache
+  genParticlesTemp_.set(std::move(genParticlesTemp));
 }
  
 /// method to cache the daughters to allow "user-friendly" access

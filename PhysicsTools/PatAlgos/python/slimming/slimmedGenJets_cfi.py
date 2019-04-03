@@ -1,21 +1,31 @@
 import FWCore.ParameterSet.Config as cms
 
-slimmedGenJets = cms.EDProducer("PATGenJetSlimmer",
-    src = cms.InputTag("ak4GenJetsNoNu"),
-    packedGenParticles = cms.InputTag("packedGenParticles"),
-    cut = cms.string("pt > 8"),
-    cutLoose = cms.string(""),
-    nLoose = cms.uint32(0),
-    clearDaughters = cms.bool(False), #False means rekeying
-    dropSpecific = cms.bool(False),
+slimmedGenJets = cms.EDProducer("PATJetSlimmer",
+   src = cms.InputTag("selectedPatGenJets"),
+   packedGenParticles = cms.InputTag("packedGenParticles"),
+   inputIsGenJets = cms.bool(True),
+   dropJetVars = cms.string("1"),
+   dropDaughters = cms.string("0"),
+   rekeyDaughters = cms.string("1"),
+   dropTrackRefs = cms.string("1"),
+   dropSpecific = cms.string("0"),
+   dropTagInfos = cms.string("1"),
+   modifyJets = cms.bool(True),
+   mixedDaughters = cms.bool(False),
+   modifierConfig = cms.PSet( modifications = cms.VPSet() )
+)
+slimmedGenJetsAK8 = cms.EDProducer("PATJetSlimmer",
+   src = cms.InputTag("packedPatGenJetsAK8"),
+   packedGenParticles = cms.InputTag("packedGenParticles"),
+   inputIsGenJets = cms.bool(True),
+   dropJetVars = cms.string("1"),
+   dropDaughters = cms.string("0"),
+   rekeyDaughters = cms.string("1"),
+   dropTrackRefs = cms.string("1"),
+   dropSpecific = cms.string("0"),
+   dropTagInfos = cms.string("1"),
+   modifyJets = cms.bool(True),
+   mixedDaughters = cms.bool(False),
+   modifierConfig = cms.PSet( modifications = cms.VPSet() )
 )
 
-slimmedGenJetsAK8 = cms.EDProducer("PATGenJetSlimmer",
-    src = cms.InputTag("ak8GenJetsNoNu"),
-    packedGenParticles = cms.InputTag("packedGenParticles"),
-    cut = cms.string("pt > 80"),
-    cutLoose = cms.string("pt > 10."),
-    nLoose = cms.uint32(3),
-    clearDaughters = cms.bool(False), #False means rekeying
-    dropSpecific = cms.bool(False),
-)

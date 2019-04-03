@@ -11,10 +11,10 @@
    Jet implements the analysis-level calorimeter jet class within the
    'pat' namespace
 
-  \author   Steven Lowette, Giovanni Petrucciani, Roger Wolf, Christian Autermann
+  \author   Steven Lowette, Giovanni Petrucciani, Roger Wolf, Christian Autermann, Salvatore Rappoccio
 */
 
-
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
 #include "DataFormats/JetReco/interface/JPTJet.h"
@@ -71,8 +71,10 @@ namespace pat {
   typedef reco::CaloJet::Specific CaloSpecific;
   typedef reco::JPTJet::Specific JPTSpecific;
   typedef reco::PFJet::Specific PFSpecific;
+  typedef reco::GenJet::Specific GenSpecific; 
   typedef std::vector<edm::FwdPtr<reco::BaseTagInfo> > TagInfoFwdPtrCollection;
   typedef std::vector<edm::FwdPtr<reco::PFCandidate> > PFCandidateFwdPtrCollection;
+  typedef std::vector<edm::FwdPtr<reco::GenParticle> > GenParticleFwdPtrCollection;
   typedef std::vector<edm::FwdPtr<CaloTower> > CaloTowerFwdPtrCollection;
   typedef std::vector<edm::Ptr<pat::Jet> > JetPtrCollection;
 
@@ -253,8 +255,10 @@ namespace pat {
       bool isJPTJet()   const { return !specificJPT_.empty(); }
       /// check to see if the jet is a reco::PFJet
       bool isPFJet()    const { return !specificPF_.empty(); }
+      /// check to see if the jet is a reco::GenJet
+      bool isGenJet()    const { return !specificGen_.empty(); }
       /// check to see if the jet is no more than a reco::BasicJet
-      bool isBasicJet() const { return !(isCaloJet() || isPFJet() || isJPTJet()); }
+      bool isBasicJet() const { return !(isCaloJet() || isPFJet() || isJPTJet() || isGenJet() ); }
       /// retrieve the calo specific part of the jet
       const CaloSpecific& caloSpecific() const {
 	if (specificCalo_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a CaloJet.\n";
@@ -272,6 +276,13 @@ namespace pat {
 	if (specificPF_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a PFJet.\n";
 	return specificPF_[0];
       }
+      /// check to see if the GenSpecific object is stored
+      bool hasGenSpecific() const { return !specificGen_.empty(); }
+      /// retrieve the pf specific part of the jet
+      const GenSpecific& genSpecific() const {
+	if (specificGen_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a GenJet.\n";
+	return specificGen_[0];
+      }
       /// set the calo specific part of the jet
       void setCaloSpecific(const CaloSpecific& newCaloSpecific) {
 	if (specificCalo_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a CaloJet.\n";
@@ -287,7 +298,13 @@ namespace pat {
 	if (specificPF_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a PFJet.\n";
 	specificPF_[0] = newPFSpecific;
       }
+      /// set the pf specific part of the jet
+      void setGenSpecific(const GenSpecific& newGenSpecific) {
+	if (specificGen_.empty()) throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a GenJet.\n";
+	specificGen_[0] = newGenSpecific;
+      }
 
+      
       // ---- Calo Jet specific information ----
 
       /// returns the maximum energy deposited in ECAL towers
@@ -353,7 +370,7 @@ namespace pat {
       /// chargedMultiplicity
       float elecMultiplicity () const {return jptSpecific().elecsInVertexInCalo.size()+jptSpecific().elecsInVertexOutCalo.size();}
 
-      // ---- JPT or PF Jet specific information ----
+      // ---- JPT, PF, or Gen Jet specific information ----
 
       /// muonMultiplicity
       int muonMultiplicity() const;
@@ -377,7 +394,7 @@ namespace pat {
       /// neutralEmEnergyFraction (relative to uncorrected jet energy)
       float neutralEmEnergyFraction()     const {return neutralEmEnergy()/((jecSetsAvailable() ? jecFactor(0) : 1.)*energy());}
 
-      // ---- PF Jet specific information ----
+      // ---- PF or Gen Jet specific information ----
       /// photonEnergy
       float photonEnergy () const {return pfSpecific().mPhotonEnergy;}
       /// photonEnergyFraction (relative to corrected jet energy)
@@ -435,6 +452,13 @@ namespace pat {
       /// If the caloTowers were embedded, these reference are transient only and must not be persisted
       std::vector<reco::PFCandidatePtr> const & getPFConstituents () const;
 
+      /// if the caloTowers were embedded, this reference is transient only and must not be persisted
+      reco::GenParticlePtr getGenParticle (unsigned fIndex) const;
+      /// get the constituents of the CaloJet.
+      /// If the caloTowers were embedded, these reference are transient only and must not be persisted
+      std::vector<reco::GenParticlePtr> const & getGenParticles () const;
+
+      
       /// get a pointer to a Candididate constituent of the jet
       ///    If using refactorized PAT, return that. (constituents size > 0)
       ///    Else check the old version of PAT (embedded constituents size > 0)
@@ -556,6 +580,12 @@ namespace pat {
       reco::PFCandidateCollection pfCandidates_; // Compatibility embedding
       reco::PFCandidateFwdPtrVector pfCandidatesFwdPtr_; // Refactorized content embedding
 
+      bool embeddedGenParticles_;
+      edm::AtomicPtrCache<std::vector<reco::GenParticlePtr> > genParticlesTemp_; // to simplify user interface
+      reco::GenParticleCollection genParticles_; // Compatibility embedding
+      reco::GenParticleFwdPtrVector genParticlesFwdPtr_; // Refactorized content embedding
+
+      
 
       // ---- Jet Substructure ----
       std::vector< pat::JetPtrCollection> subjetCollections_;
@@ -602,6 +632,7 @@ namespace pat {
       std::vector<CaloSpecific> specificCalo_;
       std::vector<JPTSpecific>  specificJPT_;
       std::vector<PFSpecific>   specificPF_;
+      std::vector<GenSpecific>  specificGen_;
 
       // ---- id functions ----
       reco::JetID    jetID_;
@@ -647,6 +678,7 @@ namespace pat {
       /// cache calo towers
       void cacheCaloTowers() const;
       void cachePFCandidates() const;
+      void cacheGenParticles() const;
       void cacheDaughters() const;
 
   };
@@ -655,6 +687,7 @@ namespace pat {
 inline float pat::Jet::chargedHadronEnergy() const
 {
   if(isPFJet()){ return pfSpecific().mChargedHadronEnergy; }
+  else if( isGenJet() ){ return genSpecific().m_ChargedHadronEnergy; }
   else if( isJPTJet() ){ return jptSpecific().mChargedHadronEnergy; }
   else{ throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a JPTJet nor from PFJet.\n"; }
 }
@@ -662,6 +695,7 @@ inline float pat::Jet::chargedHadronEnergy() const
 inline float pat::Jet::neutralHadronEnergy() const
 {
   if(isPFJet()){ return pfSpecific().mNeutralHadronEnergy; }
+  else if( isGenJet() ){ return genSpecific().m_NeutralHadronEnergy; }
   else if( isJPTJet() ){ return jptSpecific().mNeutralHadronEnergy; }
   else{ throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a JPTJet nor from PFJet.\n"; }
 }
@@ -669,6 +703,7 @@ inline float pat::Jet::neutralHadronEnergy() const
 inline float pat::Jet::chargedEmEnergy() const
 {
   if(isPFJet()){ return pfSpecific().mChargedEmEnergy; }
+  else if( isGenJet() ){ return genSpecific().m_ChargedEmEnergy;}
   else if( isJPTJet() ){ return jptSpecific().mChargedEmEnergy;}
   else{ throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a JPTJet nor from PFJet.\n"; }
 }
@@ -676,6 +711,7 @@ inline float pat::Jet::chargedEmEnergy() const
 inline float pat::Jet::neutralEmEnergy() const
 {
   if(isPFJet()){ return pfSpecific().mNeutralEmEnergy; }
+  else if( isGenJet() ){ return genSpecific().m_NeutralEmEnergy;}
   else if( isJPTJet() ){ return jptSpecific().mNeutralEmEnergy;}
   else{ throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a JPTJet nor from PFJet.\n"; }
 }
@@ -683,6 +719,7 @@ inline float pat::Jet::neutralEmEnergy() const
 inline int pat::Jet::muonMultiplicity() const
 {
   if(isPFJet()){ return pfSpecific().mMuonMultiplicity; }
+  else if(isGenJet()){ return genSpecific().m_MuonMultiplicity; }
   else if( isJPTJet() ){ return jptSpecific().muonsInVertexInCalo.size()+jptSpecific().muonsInVertexOutCalo.size();}
   else{ throw cms::Exception("Type Mismatch") << "This PAT jet was not made from a JPTJet nor from PFJet.\n"; }
 }
@@ -690,6 +727,7 @@ inline int pat::Jet::muonMultiplicity() const
 inline int pat::Jet::chargedMultiplicity() const
 {
   if(isPFJet()){ return pfSpecific().mChargedMultiplicity; }
+  else if(isGenJet()){ return genSpecific().m_ChargedHadronMultiplicity + genSpecific().m_ChargedEmMultiplicity; }
   else if( isJPTJet() ){ return jptSpecific().muonsInVertexInCalo.size()+jptSpecific().muonsInVertexOutCalo.size()+
                                 jptSpecific().pionsInVertexInCalo.size()+jptSpecific().pionsInVertexOutCalo.size()+
                                 jptSpecific().elecsInVertexInCalo.size()+jptSpecific().elecsInVertexOutCalo.size();}
