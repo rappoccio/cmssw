@@ -118,6 +118,44 @@ def applySubstructure( process, postfix="" ) :
     )
 
 
+
+
+
+    #add Gen AK8 with and without soft drop... will be needed by ungroomed AK8 jets later
+    ## PATify soft drop fat jets
+    addJetCollection(
+        process,
+        postfix=postfix,
+        labelName = 'AK8GenPuppiSoftDrop' + postfix,
+        jetSource = cms.InputTag('ak8GenJetsNoNuSoftDrop'+postfix),
+        btagDiscriminators = ['None'],
+        genJetCollection = None, 
+        jetCorrections = None,
+        getJetMCFlavour = True # jet flavor disabled
+    )
+    ## PATify soft drop subjets
+    addJetCollection(
+        process,
+        postfix=postfix,
+        labelName = 'ak8GenJetsSoftDropSubjets',
+        jetSource = cms.InputTag('ak8GenJetsNoNuSoftDrop'+postfix,'SubJets'),
+        algo = 'ak',  # needed for subjet flavor clustering
+        rParam = 0.8, # needed for subjet flavor clustering
+        btagDiscriminators = None,
+        jetCorrections = None,
+        explicitJTA = False,  
+        svClustering = False, 
+        getJetMCFlavour = True, 
+        genJetCollection = None, 
+        fatJets=cms.InputTag('ak8GenJetsNoNu'),             # needed for subjet flavor clustering
+        groomedFatJets=cms.InputTag('ak8GenJetsNoNuSoftDrop') # needed for subjet flavor clustering
+    )
+
+
+
+
+    
+
     # add groomed ECFs and N-subjettiness to soft dropped pat::Jets for fat jets and subjets
     process.load('RecoJets.JetProducers.ECF_cff')
     addToProcessAndTask('nb1AK8PuppiSoftDrop'+postfix, process.ecfNbeta1.clone(src = cms.InputTag("ak8PFJetsPuppiSoftDrop"+postfix), cuts = cms.vstring('', '', 'pt > 250')), process, task)
