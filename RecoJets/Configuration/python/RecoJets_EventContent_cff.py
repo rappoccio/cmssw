@@ -4,6 +4,7 @@ import FWCore.ParameterSet.Config as cms
 RecoJetsFEVT = cms.PSet(
     outputCommands = cms.untracked.vstring('keep recoCaloJets_*_*_*', 
                                            'keep recoPFJets_*_*_*',
+                                           'keep recoPFClusterJets_*_*_*',
                                            'keep recoTrackJets_*_*_*',
                                            'keep recoJPTJets_*_*_*',
                                            'keep recoBasicJets_*_*_*',
@@ -31,6 +32,7 @@ RecoJetsFEVT = cms.PSet(
                                            'keep *_kt4PFJets_*_*', 
                                            'keep *_kt6PFJets_*_*',
                                            'keep *_ak4PFJets_*_*',
+                                           'keep *_ak4PFClusterJets_*_*',
                                            'keep *_ak5PFJets_*_*',
                                            'keep *_ak7PFJets_*_*',
                                            'keep *_JetPlusTrackZSPCorJetAntiKt4_*_*',
@@ -53,6 +55,7 @@ RecoGenJetsFEVT = cms.PSet(
 RecoJetsRECO = cms.PSet(
     outputCommands = cms.untracked.vstring('keep *_ak4CaloJets_*_*',
                                            'keep *_ak4PFJets_*_*',
+                                           'keep *_ak4PFClusterJets_*_*',
                                            'keep *_ak4PFJetsCHS_*_*',
                                            'keep *_ak8PFJetsCHS_*_*',
                                            'keep *_ak8PFJetsCHSSoftDrop_*_*',                                           
@@ -69,7 +72,7 @@ RecoJetsRECO = cms.PSet(
                                            'keep *_ak4JetTracksAssociatorExplicit_*_*',
                                            'keep *_ak4JetExtender_*_*',
                                            'keep *_ak4JetID_*_*',
-					   'keep *_ak5CastorJets_*_*',
+                                           'keep *_ak5CastorJets_*_*',
                                            'keep *_ak5CastorJetID_*_*',
                                            'keep *_ak7CastorJets_*_*',
                                            'keep *_ak7CastorJetID_*_*',
@@ -82,6 +85,7 @@ RecoJetsRECO = cms.PSet(
                                            'keep *_fixedGridRhoFastjetCentralCalo_*_*',
                                            'keep *_fixedGridRhoFastjetCentralChargedPileUp_*_*',
                                            'keep *_fixedGridRhoFastjetCentralNeutral_*_*',
+                                           'keep *_fixedGridRhoFastjetAllPFCluster_*_*',
                                            'keep *_ak8PFJetsCHSSoftDropMass_*_*'                                 
                                            )
 )
@@ -96,6 +100,7 @@ RecoGenJetsRECO = cms.PSet(
 RecoJetsAOD = cms.PSet(
     outputCommands = cms.untracked.vstring('keep *_ak4CaloJets_*_*',
                                            'keep *_ak4PFJetsCHS_*_*',
+                                           'keep *_ak4PFClusterJets_*_*',
                                            'keep *_ak8PFJetsCHS_*_*',
                                            'keep *_ak8PFJetsCHSSoftDrop_*_*',
                                            'keep *_cmsTopTagPFJetsCHS_*_*',
@@ -123,6 +128,7 @@ RecoJetsAOD = cms.PSet(
                                            'keep *_fixedGridRhoFastjetCentralCalo_*_*',
                                            'keep *_fixedGridRhoFastjetCentralChargedPileUp_*_*',
                                            'keep *_fixedGridRhoFastjetCentralNeutral_*_*',
+                                           'keep *_fixedGridRhoFastjetAllPFCluster_*_*',
                                            'drop doubles_*Jets_rhos_*',
                                            'drop doubles_*Jets_sigmas_*',
                                            'keep *_ak8PFJetsCHSSoftDropMass_*_*'                                 

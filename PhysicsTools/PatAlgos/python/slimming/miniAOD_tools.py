@@ -274,6 +274,18 @@ def miniAOD_customizeCommon(process):
     task.add(process.caloJetMap)
     process.patJets.userData.userFloats.src += [ cms.InputTag("caloJetMap:pt"), cms.InputTag("caloJetMap:emEnergyFraction") ]
 
+    ## PFClusterJets
+    process.pfclusterJetMap = cms.EDProducer("RecoJetDeltaRValueMapProducer",
+         src = process.patJets.jetSource,
+         matched = cms.InputTag("ak4PFClusterJets"),
+         distMax = cms.double(0.4),
+         values = cms.vstring('pt','mass'),
+	 valueLabels = cms.vstring('pt','mass'),
+	 lazyParser = cms.bool(True) )
+    task.add(process.pfclusterJetMap)
+    process.patJets.userData.userFloats.src += [ cms.InputTag("pfclusterJetMap:pt"), cms.InputTag("pfclusterJetMap:mass") ]
+
+    
     #Muon object modifications 
     from PhysicsTools.PatAlgos.slimming.muonIsolationsPUPPI_cfi import makeInputForPUPPIIsolationMuon
     makeInputForPUPPIIsolationMuon(process)

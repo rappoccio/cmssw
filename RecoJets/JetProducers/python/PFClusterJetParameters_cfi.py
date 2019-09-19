@@ -5,7 +5,7 @@ PFClusterJetParameters = cms.PSet(
     srcPVs         = cms.InputTag('offlinePrimaryVertices'),
     jetType        = cms.string('PFClusterJet'),
     # minimum jet pt
-    jetPtMin       = cms.double(3.0),
+    jetPtMin       = cms.double(10.0),
     # minimum calo tower input et
     inputEtMin     = cms.double(0.3),
     # minimum calo tower input energy

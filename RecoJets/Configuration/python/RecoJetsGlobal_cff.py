@@ -5,14 +5,17 @@ from RecoJets.Configuration.JetIDProducers_cff import *
 from RecoJets.Configuration.RecoTrackJets_cff import *
 from RecoJets.Configuration.RecoJetAssociations_cff import *
 from RecoJets.Configuration.RecoPFJets_cff import *
+from RecoJets.Configuration.RecoPFClusterJets_cff import *
 from RecoJets.Configuration.RecoJPTJets_cff import *
 from JetMETCorrections.Configuration.JetCorrectorsForReco_cff import *
 
 jetGlobalRecoTask = cms.Task(recoJetsTask, 
                              recoJetIdsTask, 
                              recoTrackJetsTask)
+
 jetGlobalReco = cms.Sequence(jetGlobalRecoTask)
 jetHighLevelRecoTask = cms.Task(recoPFJetsTask,
+                                recoPFClusterJetsTask,
                                 jetCorrectorsForRecoTask,
                                 recoJetAssociationsTask,
                                 recoJetAssociationsExplicitTask,

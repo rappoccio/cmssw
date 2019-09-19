@@ -7,6 +7,12 @@ fixedGridRhoFastjetAll = cms.EDProducer("FixedGridRhoProducerFastjet",
     gridSpacing = cms.double(0.55)
 )
 
+fixedGridRhoFastjetAllPFCluster = cms.EDProducer("FixedGridRhoProducerFastjet",
+    pfCandidatesTag = cms.InputTag("pfClusterRefsForJets"),
+    maxRapidity = cms.double(5.0),
+    gridSpacing = cms.double(0.55)
+)
+
 
 fixedGridRhoFastjetAllCalo = cms.EDProducer("FixedGridRhoProducerFastjet",
     pfCandidatesTag = cms.InputTag("towerMaker"),
