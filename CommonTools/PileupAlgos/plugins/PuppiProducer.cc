@@ -260,7 +260,7 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     ++iCand;
     std::unique_ptr<pat::PackedCandidate> pCand;
     std::unique_ptr<reco::PFCandidate> pfCand;
-    std::unique_ptr<reco::PFCandidate> pfCandWithWeight;
+    std::unique_ptr<reco::PFCandidate> pfCandUnweighted;
     if (fUseExistingWeights || fClonePackedCands) {
       const pat::PackedCandidate* cand = dynamic_cast<const pat::PackedCandidate*>(&aCand);
       if (!cand)
@@ -270,7 +270,7 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
       auto id = dummySinceTranslateIsNotStatic.translatePdgIdToType(aCand.pdgId());
       const reco::PFCandidate* cand = dynamic_cast<const reco::PFCandidate*>(&aCand);
       pfCand.reset(new reco::PFCandidate(cand ? *cand : reco::PFCandidate(aCand.charge(), aCand.p4(), id)));
-      pfCandWithWeight.reset(new reco::PFCandidate(*pfCand) );
+      pfCandUnweighted.reset( new reco::PFCandidate(cand ? *cand : reco::PFCandidate(aCand.charge(), aCand.p4(), id)));
     }
 
     if (fClonePackedCands && (!fUseExistingWeights)) {
@@ -287,26 +287,26 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                           lWeights[iCand] * aCand.pz(),
                           lWeights[iCand] * aCand.energy());
 
-    if (fUseExistingWeights || fClonePackedCands) {
-      pCand->setP4(puppiP4s.back());
-      pCand->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
-      fPackedPuppiCandidates->push_back(*pCand);
+    if ( fClonePackedCands) {
+	pCand->setP4(puppiP4s.back());
+	pCand->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
+	fPackedPuppiCandidates->push_back(*pCand);
     } else {
       pfCand->setP4(puppiP4s.back());
-      // note: Do NOT set the p4 for pfCandWithWeight. 
+      // note: Do NOT set the p4 for pfCandUnweighted. 
       pfCand->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
-      pfCandWithWeight->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
+      pfCandUnweighted->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
 
-      if( true ) {
+      if( fUseExistingWeights ) {
 	pfCand->setPuppiWeight(pCand->puppiWeight(), lWeights[iCand]);
-	pfCandWithWeight->setPuppiWeight(pCand->puppiWeight(), lWeights[iCand]);
+	pfCandUnweighted->setPuppiWeight(pCand->puppiWeight(), lWeights[iCand]);
       } else {
 	pfCand->setPuppiWeight(lWeights[iCand], pfCand->puppiWeightNoLep());
-	pfCandWithWeight->setPuppiWeight(lWeights[iCand], pfCand->puppiWeightNoLep());
+	pfCandUnweighted->setPuppiWeight(lWeights[iCand], pfCand->puppiWeightNoLep());
       }
 
       fPuppiCandidates->push_back(*pfCand);
-      fPuppiCandidatesWithWeights->push_back(*pfCandWithWeight);
+      fPuppiCandidatesWithWeights->push_back(*pfCandUnweighted);
     }
   }
 
