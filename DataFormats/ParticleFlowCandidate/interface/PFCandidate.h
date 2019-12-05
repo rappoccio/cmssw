@@ -429,6 +429,15 @@ namespace reco {
     /// set the fraction of hcal energy as function of depth (index 0..6 for depth 1..7)
     void setHcalDepthEnergyFractions(const std::array<float, 7>& fracs) { hcalDepthEnergyFractions_ = fracs; }
 
+    /// puppi weights
+    void setPuppiWeight(float p,
+			float p_nolep = 0.0){
+      puppiWeight_=p; puppiWeightNoLep_=p_nolep;
+    }
+    float puppiWeight() const { return puppiWeight_;}           /// Weight from full PUPPI
+    float puppiWeightNoLep() const {return puppiWeightNoLep_;}  /// Weight from PUPPI removing leptons
+
+
   private:
     /// Polymorphic overlap
     bool overlap(const Candidate&) const override;
@@ -528,6 +537,10 @@ namespace reco {
     float time_;
     /// timing information uncertainty (<0 if timing not available)
     float timeError_;
+
+    /// puppi weight
+    float puppiWeight_; 
+    float puppiWeightNoLep_;
 
     std::array<float, 7> hcalDepthEnergyFractions_;
   };

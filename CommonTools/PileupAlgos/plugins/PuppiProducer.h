@@ -39,7 +39,7 @@ private:
   virtual void beginJob();
   void produce(edm::Event&, const edm::EventSetup&) override;
   virtual void endJob();
-
+  
   edm::EDGetTokenT<CandidateView> tokenPFCandidates_;
   edm::EDGetTokenT<VertexCollection> tokenVertices_;
   std::string fPuppiName;
@@ -60,6 +60,8 @@ private:
   std::unique_ptr<PuppiContainer> fPuppiContainer;
   std::vector<RecoObj> fRecoObjCollection;
   std::unique_ptr<PFOutputCollection> fPuppiCandidates;
+  std::unique_ptr<PFOutputCollection> fPuppiCandidatesWithWeights;
   std::unique_ptr<PackedOutputCollection> fPackedPuppiCandidates;
+  std::unique_ptr<PFOutputCollection> fPFCandidatesWithWeights;
 };
 #endif
