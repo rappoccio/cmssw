@@ -96,11 +96,15 @@
    <version ClassVersion="11" checksum="1059349113"/>
    <version ClassVersion="10" checksum="4127213986"/>
   </class>
-  <class name="reco::ShallowClonePtrCandidate"  ClassVersion="12">
+  <class name="reco::ShallowClonePtrCandidate"  ClassVersion="13">
+   <version ClassVersion="13" checksum="1346419248"/>
    <version ClassVersion="12" checksum="917739380"/>
+   <field name="m_state" version="[13-]" transient="true"/>
    <version ClassVersion="11" checksum="124560908"/>
    <version ClassVersion="10" checksum="2575892329"/>
   </class>
+
+
   <class name="reco::NamedCompositeCandidate" ClassVersion="12">
    <version ClassVersion="12" checksum="1682589651"/>
    <version ClassVersion="11" checksum="1100712875"/>
@@ -202,6 +206,8 @@
   <class name="std::vector<reco::Particle>" />
   <class name="std::vector<reco::Candidate *>" />
   <class name="std::vector<reco::LeafCandidate>" />
+  <class name="edm::View<reco::ShallowClonePtrCandidate>" />
+  <class name="std::vector<reco::ShallowClonePtrCandidate>" />
   <class name="reco::CandidateCollection" />
   <class name="reco::CandidateBaseRef" />
 
@@ -218,6 +224,9 @@
   <class name="edm::Wrapper<std::vector<edm::RefToBase<reco::Candidate> > >" />
   <class name="edm::Wrapper<std::vector<edm::Ptr<reco::Candidate> > >" />
   <!-- <class pattern="edm::AssociationMap<*>::const_iterator" /> -->
+  <class name="edm::Wrapper<reco::ShallowClonePtrCandidate>" />
+  <class name="edm::Wrapper<std::vector<reco::ShallowClonePtrCandidate> > " />
+  <class name="edm::Wrapper<edm::View<reco::ShallowClonePtrCandidate> > " />
 
   <!-- <class pattern="edm::Wrapper<edm::AssociationVector<*>"/> -->
   <class name="edm::Wrapper<edm::AssociationVector<edm::RefProd<edm::OwnVector<reco::Candidate,edm::ClonePolicy<reco::Candidate> > >,vector<double>,edm::Ref<edm::OwnVector<reco::Candidate,edm::ClonePolicy<reco::Candidate> >,reco::Candidate,edm::refhelper::FindUsingAdvance<edm::OwnVector<reco::Candidate,edm::ClonePolicy<reco::Candidate> >,reco::Candidate> >,unsigned int,edm::helper::AssociationIdenticalKeyReference> >" />

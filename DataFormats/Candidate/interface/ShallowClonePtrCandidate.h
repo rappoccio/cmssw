@@ -17,22 +17,24 @@ namespace reco {
     /// collection of daughter candidates
     typedef CandidateCollection daughters;
     /// default constructor
-    ShallowClonePtrCandidate() : LeafCandidate() {}
+  ShallowClonePtrCandidate() : LeafCandidate(), w_(1.f) {}
     /// constructor from Particle
-    explicit ShallowClonePtrCandidate(const CandidatePtr& masterClone)
-        : LeafCandidate(*masterClone), masterClone_(masterClone) {}
+    explicit ShallowClonePtrCandidate(const CandidatePtr& masterClone, float w=1.f)
+      : LeafCandidate(masterClone->charge(), masterClone->p4()*w,masterClone->vertex()), masterClone_(masterClone), w_(w) {}
     /// constructor from values
     ShallowClonePtrCandidate(const CandidatePtr& masterClone,
                              Charge q,
                              const LorentzVector& p4,
-                             const Point& vtx = Point(0, 0, 0))
-        : LeafCandidate(q, p4, vtx), masterClone_(masterClone) {}
+                             const Point& vtx = Point(0, 0, 0), 
+			     float w=1.f)
+        : LeafCandidate(q, p4*w, vtx), masterClone_(masterClone), w_(w) {}
     /// constructor from values
     ShallowClonePtrCandidate(const CandidatePtr& masterClone,
                              Charge q,
                              const PolarLorentzVector& p4,
-                             const Point& vtx = Point(0, 0, 0))
-        : LeafCandidate(q, p4, vtx), masterClone_(masterClone) {}
+                             const Point& vtx = Point(0, 0, 0),
+			     float w=1.f)
+        : LeafCandidate(q, p4*w, vtx), masterClone_(masterClone), w_(w) {}
     /// destructor
     ~ShallowClonePtrCandidate() override;
     /// returns a clone of the Candidate object
@@ -68,6 +70,8 @@ namespace reco {
     bool overlap(const Candidate& c) const override { return masterClone_->overlap(c); }
     /// CandidatePtrerence to master clone
     CandidatePtr masterClone_;
+    /// optional weight, eg for puppi
+    float w_;
   };
 
 }  // namespace reco

@@ -18,6 +18,7 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "CommonTools/PileupAlgos/interface/PuppiContainer.h"
 #include "CommonTools/PileupAlgos/interface/PuppiAlgo.h"
+#include "DataFormats/Candidate/interface/ShallowClonePtrCandidate.h"
 
 // ------------------------------------------------------------------------------------------
 class PuppiProducer : public edm::stream::EDProducer<> {
@@ -61,5 +62,6 @@ private:
   std::vector<RecoObj> fRecoObjCollection;
   std::unique_ptr<PFOutputCollection> fPuppiCandidates;
   std::unique_ptr<PackedOutputCollection> fPackedPuppiCandidates;
+  std::unique_ptr<std::vector<reco::ShallowClonePtrCandidate> > fClones;
 };
 #endif

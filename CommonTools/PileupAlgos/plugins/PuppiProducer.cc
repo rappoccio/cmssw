@@ -48,6 +48,8 @@ PuppiProducer::PuppiProducer(const edm::ParameterSet& iConfig) {
   else
     produces<reco::PFCandidateCollection>();
 
+  produces<std::vector<reco::ShallowClonePtrCandidate> >("weighted");
+
   if (fPuppiDiagnostics) {
     produces<double>("PuppiNAlgos");
     produces<std::vector<double>>("PuppiRawAlphas");
@@ -250,6 +252,7 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // the input is set to have a four-vector of 0,0,0,0
   fPuppiCandidates.reset(new PFOutputCollection);
   fPackedPuppiCandidates.reset(new PackedOutputCollection);
+  fClones.reset( new std::vector< reco::ShallowClonePtrCandidate > );
   std::unique_ptr<edm::ValueMap<LorentzVector>> p4PupOut(new edm::ValueMap<LorentzVector>());
   LorentzVectorCollection puppiP4s;
   std::vector<reco::CandidatePtr> values(hPFProduct->size());
@@ -290,7 +293,9 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
       pfCand->setP4(puppiP4s.back());
       pfCand->setSourceCandidatePtr(aCand.sourceCandidatePtr(0));
       fPuppiCandidates->push_back(*pfCand);
+      fClones->emplace_back( aCand.sourceCandidatePtr(0), static_cast<float>( lWeights[iCand] ) );
     }
+
   }
 
   //Compute the modified p4s
@@ -318,6 +323,7 @@ void PuppiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   filler.insert(hPFProduct, values.begin(), values.end());
   filler.fill();
   iEvent.put(std::move(pfMap_p));
+  iEvent.put(std::move(fClones), "weighted");
 
   //////////////////////////////////////////////
   if (fPuppiDiagnostics && !fUseExistingWeights) {
