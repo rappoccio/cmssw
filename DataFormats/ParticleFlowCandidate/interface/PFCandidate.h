@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <array>
 
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateBase.h"
 #include "DataFormats/Math/interface/Point3D.h"
 
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
@@ -37,51 +38,8 @@ namespace reco {
      \author Colin Bernet
      \date   February 2007
   */
-  class PFCandidate : public CompositeCandidate {
+  class PFCandidate : public PFCandidateBase {
   public:
-    /// particle types
-    enum ParticleType {
-      X = 0,     // undefined
-      h,         // charged hadron
-      e,         // electron
-      mu,        // muon
-      gamma,     // photon
-      h0,        // neutral hadron
-      h_HF,      // HF tower identified as a hadron
-      egamma_HF  // HF tower identified as an EM particle
-    };
-
-    enum Flags {
-      NORMAL = 0,
-      E_PHI_SMODULES,
-      E_ETA_0,
-      E_ETA_MODULES,
-      E_BARREL_ENDCAP,
-      E_PRESHOWER_EDGE,
-      E_PRESHOWER,
-      E_ENDCAP_EDGE,
-      H_ETA_0,
-      H_BARREL_ENDCAP,
-      H_ENDCAP_VFCAL,
-      H_VFCAL_EDGE,
-      T_TO_DISP,
-      T_FROM_DISP,
-      T_FROM_V0,
-      T_FROM_GAMMACONV,
-      GAMMA_TO_GAMMACONV
-    };
-
-    enum PFVertexType {
-      kCandVertex = 0,
-      kTrkVertex = 1,
-      kComMuonVertex = 2,
-      kSAMuonVertex = 3,
-      kTrkMuonVertex = 4,
-      kGSFVertex = 5,
-      kTPFMSMuonVertex = 6,
-      kPickyMuonVertex = 7,
-      kDYTMuonVertex = 8
-    };
 
     /// default constructor
     PFCandidate();
@@ -118,6 +76,7 @@ namespace reco {
     using reco::Candidate::setSourceCandidatePtr;
     void setSourceCandidatePtr(const PFCandidatePtr& ptr) { sourcePtr_ = ptr; }
 
+    using reco::Candidate::numberOfSourceCandidatePtrs;
     size_t numberOfSourceCandidatePtrs() const override { return 1; }
 
     CandidatePtr sourceCandidatePtr(size_type i) const override { return sourcePtr_; }
@@ -125,24 +84,24 @@ namespace reco {
     /// returns the pdg id corresponding to the particle type.
     /// the particle type could be removed at some point to gain some space.
     /// low priority
-    int translateTypeToPdgId(ParticleType type) const;
-    ParticleType translatePdgIdToType(int pdgid) const;
+    int translateTypeToPdgId(ParticleType type) const override;
+    ParticleType translatePdgIdToType(int pdgid) const override;
 
     /// set Particle Type
-    void setParticleType(ParticleType type);
+    void setParticleType(ParticleType type) override;
 
     /// add an element to the current PFCandidate
     /*     void addElement( const reco::PFBlockElement* element ); */
 
     /// add element in block
-    void addElementInBlock(const reco::PFBlockRef& blockref, unsigned elementIndex);
+    void addElementInBlock(const reco::PFBlockRef& blockref, unsigned elementIndex) override;
 
     /// set track reference
-    void setTrackRef(const reco::TrackRef& ref);
+    void setTrackRef(const reco::TrackRef& ref) override;
 
     /// return a reference to the corresponding track, if charged.
     /// otherwise, return a null reference
-    reco::TrackRef trackRef() const;
+    reco::TrackRef trackRef() const override;
 
     /// return a pointer to the best track, if available.
     /// otherwise, return a null pointer
@@ -172,132 +131,132 @@ namespace reco {
     }
 
     /// set gsftrack reference
-    void setGsfTrackRef(const reco::GsfTrackRef& ref);
+    void setGsfTrackRef(const reco::GsfTrackRef& ref) override;
 
     /// return a reference to the corresponding GSF track, if an electron.
     /// otherwise, return a null reference
-    reco::GsfTrackRef gsfTrackRef() const;
+    reco::GsfTrackRef gsfTrackRef() const override;
 
     /// set muon reference
-    void setMuonRef(const reco::MuonRef& ref);
+    void setMuonRef(const reco::MuonRef& ref) override;
 
     /// return a reference to the corresponding muon, if a muon.
     /// otherwise, return a null reference
-    reco::MuonRef muonRef() const;
+    reco::MuonRef muonRef() const override;
 
     /// set displaced vertex reference
-    void setDisplacedVertexRef(const reco::PFDisplacedVertexRef& ref, Flags flag);
+    void setDisplacedVertexRef(const reco::PFDisplacedVertexRef& ref, Flags flag) override;
 
     /// return a reference to the corresponding displaced vertex,
     /// otherwise, return a null reference
-    reco::PFDisplacedVertexRef displacedVertexRef(Flags type) const;
+    reco::PFDisplacedVertexRef displacedVertexRef(Flags type) const override;
 
     /// set ref to original reco conversion
-    void setConversionRef(const reco::ConversionRef& ref);
+    void setConversionRef(const reco::ConversionRef& ref) override;
 
     /// return a reference to the original conversion
-    reco::ConversionRef conversionRef() const;
+    reco::ConversionRef conversionRef() const override;
 
     /// set ref to original reco conversion
-    void setV0Ref(const reco::VertexCompositeCandidateRef& ref);
+    void setV0Ref(const reco::VertexCompositeCandidateRef& ref) override;
 
     /// return a reference to the original conversion
-    reco::VertexCompositeCandidateRef v0Ref() const;
+    reco::VertexCompositeCandidateRef v0Ref() const override;
 
     /// return a reference to the corresponding GsfElectron if any
-    reco::GsfElectronRef gsfElectronRef() const;
+    reco::GsfElectronRef gsfElectronRef() const override;
 
     /// return a reference to the electron extra
-    reco::PFCandidateElectronExtraRef electronExtraRef() const;
+    reco::PFCandidateElectronExtraRef electronExtraRef() const override;
 
     /// set corrected Ecal energy
-    void setEcalEnergy(float eeRaw, float eeCorr) {
+    void setEcalEnergy(float eeRaw, float eeCorr) override {
       rawEcalEnergy_ = eeRaw;
       ecalERatio_ = std::abs(eeRaw) < 1.e-6 ? 1.0 : eeCorr / eeRaw;
     }
 
     /// return corrected Ecal energy
-    double ecalEnergy() const { return ecalERatio_ * rawEcalEnergy_; }
+    double ecalEnergy() const override { return ecalERatio_ * rawEcalEnergy_; }
 
     /// return corrected Ecal energy
-    double rawEcalEnergy() const { return rawEcalEnergy_; }
+    double rawEcalEnergy() const override { return rawEcalEnergy_; }
 
     /// set corrected Hcal energy
-    void setHcalEnergy(float ehRaw, float ehCorr) {
+    void setHcalEnergy(float ehRaw, float ehCorr) override {
       rawHcalEnergy_ = ehRaw;
       hcalERatio_ = std::abs(ehRaw) < 1.e-6 ? 1.0 : ehCorr / ehRaw;
     }
 
     /// return corrected Hcal energy
-    double hcalEnergy() const { return hcalERatio_ * rawHcalEnergy_; }
+    double hcalEnergy() const override { return hcalERatio_ * rawHcalEnergy_; }
 
     /// return raw Hcal energy
-    double rawHcalEnergy() const { return rawHcalEnergy_; }
+    double rawHcalEnergy() const override { return rawHcalEnergy_; }
 
     /// set corrected Hcal energy
-    void setHoEnergy(float eoRaw, float eoCorr) {
+    void setHoEnergy(float eoRaw, float eoCorr) override {
       rawHoEnergy_ = eoRaw;
       hoERatio_ = std::abs(eoRaw) < 1.e-6 ? 1.0 : eoCorr / eoRaw;
     }
 
     /// return corrected Hcal energy
-    double hoEnergy() const { return hoERatio_ * rawHoEnergy_; }
+    double hoEnergy() const override { return hoERatio_ * rawHoEnergy_; }
 
     /// return raw Hcal energy
-    double rawHoEnergy() const { return rawHoEnergy_; }
+    double rawHoEnergy() const override { return rawHoEnergy_; }
 
     /// set GsfElectronRef
-    void setGsfElectronRef(const reco::GsfElectronRef& ref);
+    void setGsfElectronRef(const reco::GsfElectronRef& ref) override;
 
-    void setSuperClusterRef(const reco::SuperClusterRef& scRef);
+    void setSuperClusterRef(const reco::SuperClusterRef& scRef) override;
 
     /// return a reference to the corresponding SuperCluster if any
-    reco::SuperClusterRef superClusterRef() const;
+    reco::SuperClusterRef superClusterRef() const override;
 
     /// set ref to the corresponding reco::Photon if any
-    void setPhotonRef(const reco::PhotonRef& phRef);
+    void setPhotonRef(const reco::PhotonRef& phRef) override;
 
     /// return a reference to the corresponding Photon if any
-    reco::PhotonRef photonRef() const;
+    reco::PhotonRef photonRef() const override;
 
     /// set the PF Photon Extra Ref
-    void setPFPhotonExtraRef(const reco::PFCandidatePhotonExtraRef& ref);
+    void setPFPhotonExtraRef(const reco::PFCandidatePhotonExtraRef& ref) override;
 
     /// return a reference to the photon extra
-    reco::PFCandidatePhotonExtraRef photonExtraRef() const;
+    reco::PFCandidatePhotonExtraRef photonExtraRef() const override;
 
     /// set the PF EGamma Extra Ref
-    void setPFEGammaExtraRef(const reco::PFCandidateEGammaExtraRef& ref);
+    void setPFEGammaExtraRef(const reco::PFCandidateEGammaExtraRef& ref) override;
 
     /// return a reference to the EGamma extra
-    reco::PFCandidateEGammaExtraRef egammaExtraRef() const;
+    reco::PFCandidateEGammaExtraRef egammaExtraRef() const override;
 
     /// set corrected PS1 energy
-    void setPs1Energy(float e1) { ps1Energy_ = e1; }
+    void setPs1Energy(float e1) override { ps1Energy_ = e1; }
 
     /// return corrected PS1 energy
-    double pS1Energy() const { return ps1Energy_; }
+    double pS1Energy() const override { return ps1Energy_; }
 
     /// set corrected PS2 energy
-    void setPs2Energy(float e2) { ps2Energy_ = e2; }
+    void setPs2Energy(float e2) override { ps2Energy_ = e2; }
 
     /// return corrected PS2 energy
-    double pS2Energy() const { return ps2Energy_; }
+    double pS2Energy() const override { return ps2Energy_; }
 
     /// particle momentum *= rescaleFactor
-    void rescaleMomentum(double rescaleFactor);
+    void rescaleMomentum(double rescaleFactor) override;
 
     /// set a given flag
-    void setFlag(Flags theFlag, bool value);
+    void setFlag(Flags theFlag, bool value) override;
 
     /// return a given flag
-    bool flag(Flags theFlag) const;
+    bool flag(Flags theFlag) const override;
 
     /// set uncertainty on momentum
-    void setDeltaP(double dp) { deltaP_ = dp; }
+    void setDeltaP(double dp) override { deltaP_ = dp; }
 
     /// uncertainty on 3-momentum
-    double deltaP() const { return deltaP_; }
+    double deltaP() const override { return deltaP_; }
 
     //  int pdgId() const { return translateTypeToPdgId( particleId_ ); }
 
@@ -307,63 +266,63 @@ namespace reco {
     ///   to 1 otherwise
     /// For neutral particles, it is set to the default value
 
-    void set_mva_Isolated(float mvaI) { mva_Isolated_ = mvaI; }
+    void set_mva_Isolated(float mvaI) override { mva_Isolated_ = mvaI; }
     // mva for isolated electrons
-    float mva_Isolated() const { return mva_Isolated_; }
+    float mva_Isolated() const override { return mva_Isolated_; }
 
-    void set_mva_e_pi(float mvaNI) { mva_e_pi_ = mvaNI; }
+    void set_mva_e_pi(float mvaNI) override { mva_e_pi_ = mvaNI; }
     /// mva for electron-pion discrimination
-    float mva_e_pi() const { return mva_e_pi_; }
+    float mva_e_pi() const override { return mva_e_pi_; }
 
     /// set mva for electron-muon discrimination
-    void set_mva_e_mu(float mva) { mva_e_mu_ = mva; }
+    void set_mva_e_mu(float mva) override { mva_e_mu_ = mva; }
 
     /// mva for electron-muon discrimination
-    float mva_e_mu() const { return mva_e_mu_; }
+    float mva_e_mu() const override { return mva_e_mu_; }
 
     /// set mva for pi-muon discrimination
-    void set_mva_pi_mu(float mva) { mva_pi_mu_ = mva; }
+    void set_mva_pi_mu(float mva) override { mva_pi_mu_ = mva; }
 
     /// mva for pi-muon discrimination
-    float mva_pi_mu() const { return mva_pi_mu_; }
+    float mva_pi_mu() const override { return mva_pi_mu_; }
 
     /// set mva for gamma detection
-    void set_mva_nothing_gamma(float mva) { mva_nothing_gamma_ = mva; }
+    void set_mva_nothing_gamma(float mva) override { mva_nothing_gamma_ = mva; }
 
     /// mva for gamma detection
-    float mva_nothing_gamma() const { return mva_nothing_gamma_; }
+    float mva_nothing_gamma() const override { return mva_nothing_gamma_; }
 
     /// set mva for neutral hadron detection
-    void set_mva_nothing_nh(float mva) { mva_nothing_nh_ = mva; }
+    void set_mva_nothing_nh(float mva) override { mva_nothing_nh_ = mva; }
 
     /// mva for neutral hadron detection
-    float mva_nothing_nh() const { return mva_nothing_nh_; }
+    float mva_nothing_nh() const override { return mva_nothing_nh_; }
 
     /// set mva for neutral hadron - gamma discrimination
-    void set_mva_gamma_nh(float mva) { mva_gamma_nh_ = mva; }
+    void set_mva_gamma_nh(float mva) override { mva_gamma_nh_ = mva; }
 
     /// mva for neutral hadron - gamma discrimination
-    float mva_gamma_nh() const { return mva_gamma_nh_; }
+    float mva_gamma_nh() const override { return mva_gamma_nh_; }
 
     /// set position at ECAL entrance
-    void setPositionAtECALEntrance(const math::XYZPointF& pos) { positionAtECALEntrance_ = pos; }
+    void setPositionAtECALEntrance(const math::XYZPointF& pos) override { positionAtECALEntrance_ = pos; }
 
     /// set the PF Electron Extra Ref
-    void setPFElectronExtraRef(const reco::PFCandidateElectronExtraRef& ref);
+    void setPFElectronExtraRef(const reco::PFCandidateElectronExtraRef& ref) override;
 
     /// set the Best Muon Track Ref
-    void setMuonTrackType(const reco::Muon::MuonTrackType& type) { muonTrackType_ = type; }
+    void setMuonTrackType(const reco::Muon::MuonTrackType& type) override { muonTrackType_ = type; }
 
     /// get the Best Muon Track Ref
 
-    const reco::Muon::MuonTrackType bestMuonTrackType() const { return muonTrackType_; }
+    const reco::Muon::MuonTrackType bestMuonTrackType() const override { return muonTrackType_; }
 
     /// \return position at ECAL entrance
-    const math::XYZPointF& positionAtECALEntrance() const { return positionAtECALEntrance_; }
+    const math::XYZPointF& positionAtECALEntrance() const override { return positionAtECALEntrance_; }
 
     /// particle identification code
     /// \todo use Particle::pdgId_ and remove this data member
-    virtual ParticleType particleId() const { return translatePdgIdToType(pdgId()); }
+    virtual ParticleType particleId() const override { return translatePdgIdToType(pdgId()); }
 
     /// return indices of elements used in the block
     /*     const std::vector<unsigned>& elementIndices() const {  */
@@ -394,7 +353,7 @@ namespace reco {
     //PFCandidate, use the setVertex method. If you find that you are using frequently two store a
     // vertex that is the same as one of the refs in this class, you should just extend the enum
     // and modify the vertex() method accordingly.
-    void setVertexSource(PFVertexType vt) {
+    void setVertexSource(PFVertexType vt) override {
       vertexType_ = vt;
       if (vertexType_ != kCandVertex)
         LeafCandidate::setVertex(Point(0., 0., 0.));
@@ -411,23 +370,23 @@ namespace reco {
     double vz() const override { return vertex().z(); }
 
     /// do we have a valid time information
-    bool isTimeValid() const { return timeError_ >= 0.f; }
+    bool isTimeValid() const override { return timeError_ >= 0.f; }
     /// \return the timing
-    float time() const { return time_; }
+    float time() const override { return time_; }
     /// \return the timing uncertainty
-    float timeError() const { return timeError_; }
+    float timeError() const override { return timeError_; }
     /// \set the timing information
-    void setTime(float time, float timeError = 0.f) {
+    void setTime(float time, float timeError = 0.f) override {
       time_ = time;
       timeError_ = timeError;
     }
 
     /// fraction of hcal energy at a given depth  (depth = 1 .. 7)
-    float hcalDepthEnergyFraction(unsigned int depth) const { return hcalDepthEnergyFractions_[depth - 1]; }
+    float hcalDepthEnergyFraction(unsigned int depth) const override { return hcalDepthEnergyFractions_[depth - 1]; }
     /// fraction of hcal energy at a given depth (index 0..6 for depth 1..7)
-    const std::array<float, 7>& hcalDepthEnergyFractions() const { return hcalDepthEnergyFractions_; }
+    const std::array<float, 7>& hcalDepthEnergyFractions() const override { return hcalDepthEnergyFractions_; }
     /// set the fraction of hcal energy as function of depth (index 0..6 for depth 1..7)
-    void setHcalDepthEnergyFractions(const std::array<float, 7>& fracs) { hcalDepthEnergyFractions_ = fracs; }
+    void setHcalDepthEnergyFractions(const std::array<float, 7>& fracs) override { hcalDepthEnergyFractions_ = fracs; }
 
   private:
     /// Polymorphic overlap

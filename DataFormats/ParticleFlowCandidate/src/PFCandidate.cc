@@ -61,7 +61,7 @@ PFCandidate::PFCandidate(const PFCandidatePtr& sourcePtr) : PFCandidate(*sourceP
 PFCandidate::PFCandidate(Charge charge, const LorentzVector& p4, ParticleType partId)
     :
 
-      CompositeCandidate(charge, p4),
+      PFCandidateBase(charge, p4, partId),
       elementsInBlocks_(nullptr),
       ecalERatio_(1.),
       hcalERatio_(1.),
@@ -113,7 +113,7 @@ PFCandidate::PFCandidate(Charge charge, const LorentzVector& p4, ParticleType pa
 }
 
 PFCandidate::PFCandidate(PFCandidate const& iOther)
-    : CompositeCandidate(iOther),
+    : PFCandidateBase(iOther),
       elementsInBlocks_(nullptr),
       blocksStorage_(iOther.blocksStorage_),
       elementsStorage_(iOther.elementsStorage_),
@@ -152,7 +152,7 @@ PFCandidate::PFCandidate(PFCandidate const& iOther)
 }
 
 PFCandidate& PFCandidate::operator=(PFCandidate const& iOther) {
-  CompositeCandidate::operator=(iOther);
+  PFCandidateBase::operator=(iOther);
   auto tmp = iOther.elementsInBlocks_.load(std::memory_order_acquire);
   if (nullptr != tmp) {
     delete elementsInBlocks_.exchange(new ElementsInBlocks{*tmp}, std::memory_order_acq_rel);

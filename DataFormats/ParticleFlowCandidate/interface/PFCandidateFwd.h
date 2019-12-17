@@ -10,6 +10,7 @@
 
 namespace reco {
   class PFCandidate;
+  class PFCandidateBase;
 
   /// collection of PFCandidates
   typedef std::vector<reco::PFCandidate> PFCandidateCollection;
@@ -43,6 +44,10 @@ namespace reco {
 
   /// vector of "forward" reference
   typedef std::vector<PFCandidateFwdPtr> PFCandidateFwdPtrVector;
+
+  /// persistent Ptr to a PFCandidateBase
+  typedef edm::Ptr<PFCandidateBase> PFCandidateBasePtr;
+
 
 }  // namespace reco
 
