@@ -29,6 +29,7 @@
 #include "DataFormats/TauReco/interface/PFTau.h"
 #include "DataFormats/TauReco/interface/PFTauFwd.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/PFClusterJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
@@ -44,6 +45,7 @@ typedef HLTSinglet<RecoEcalCandidate> HLT1Photon;
 typedef HLTSinglet<Electron> HLT1Electron;
 typedef HLTSinglet<RecoChargedCandidate> HLT1Muon;
 typedef HLTSinglet<CaloJet> HLT1CaloJet;
+typedef HLTSinglet<PFClusterJet> HLT1PFClusterJet;
 typedef HLTSinglet<CompositeCandidate> HLT1Composite;
 typedef HLTSinglet<CaloMET> HLT1CaloMET;
 typedef HLTSinglet<MET> HLT1MET;
