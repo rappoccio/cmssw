@@ -18,7 +18,7 @@ PFJetsMatchedToFilteredCaloJetsProducer::PFJetsMatchedToFilteredCaloJetsProducer
   CaloJetFilter = iConfig.getParameter<InputTag>("CaloJetFilter");
   DeltaR_ = iConfig.getParameter<double>("DeltaR");
   TriggerType_ = iConfig.getParameter<int>("TriggerType");
-
+  useCaloJets_ = iConfig.getParameter<bool>("useCaloJets");
   m_thePFJetToken = consumes<edm::View<reco::Candidate> >(PFJetSrc);
   m_theTriggerJetToken = consumes<trigger::TriggerFilterObjectWithRefs>(CaloJetFilter);
 
@@ -33,6 +33,7 @@ void PFJetsMatchedToFilteredCaloJetsProducer::fillDescriptions(edm::Configuratio
   desc.add<edm::InputTag>("CaloJetFilter", edm::InputTag("hltSingleJet240Regional"));
   desc.add<double>("DeltaR", 0.5);
   desc.add<int>("TriggerType", trigger::TriggerJet);
+  desc.add<bool>("useCaloJets", true);
   descriptions.add("hltPFJetsMatchedToFilteredCaloJetsProducer", desc);
 }
 
@@ -54,24 +55,49 @@ void PFJetsMatchedToFilteredCaloJetsProducer::produce(edm::Event& iEvent, const 
   iEvent.getByToken(m_theTriggerJetToken, TriggeredCaloJets);
 
   jetRefVec.clear();
+  pfClusterJetRefVec.clear();
+  if (useCaloJets_) {
 
-  TriggeredCaloJets->getObjects(TriggerType_, jetRefVec);
-  // std::cout <<"Size of input triggered jet collection "<<jetRefVec.size()<<std::endl;
-  math::XYZPoint a(0., 0., 0.);
-  PFJet::Specific f;
+    TriggeredCaloJets->getObjects(TriggerType_, jetRefVec);
 
-  for (auto& iCalo : jetRefVec) {
-    // std::cout << "\tiTriggerJet: " << iCalo << " pT= " << jetRefVec[iCalo]->pt() << std::endl;
-    for (unsigned int iPF = 0; iPF < PFJets->size(); iPF++) {
-      const Candidate& myJet = (*PFJets)[iPF];
-      double deltaR = ROOT::Math::VectorUtil::DeltaR(myJet.p4().Vect(), (iCalo->p4()).Vect());
-      if (deltaR < DeltaR_) {
-        PFJet myPFJet(myJet.p4(), a, f);
-        pfjets->push_back(myPFJet);
-        break;
+    // std::cout <<"Size of input triggered jet collection "<<jetRefVec.size()<<std::endl;
+    math::XYZPoint a(0., 0., 0.);
+    PFJet::Specific f;
+
+    for (auto& iCalo : jetRefVec) {
+      // std::cout << "\tiTriggerJet: " << iCalo << " pT= " << jetRefVec[iCalo]->pt() << std::endl;
+      for (unsigned int iPF = 0; iPF < PFJets->size(); iPF++) {
+	const Candidate& myJet = (*PFJets)[iPF];
+	double deltaR = ROOT::Math::VectorUtil::DeltaR(myJet.p4().Vect(), (iCalo->p4()).Vect());
+	if (deltaR < DeltaR_) {
+	  PFJet myPFJet(myJet.p4(), a, f);
+	  pfjets->push_back(myPFJet);
+	  break;
+	}
+      }
+    }
+  } else {
+
+    TriggeredCaloJets->getObjects(TriggerType_, pfClusterJetRefVec);
+
+    // std::cout <<"Size of input triggered jet collection "<<jetRefVec.size()<<std::endl;                   
+    math::XYZPoint a(0., 0., 0.);
+    PFJet::Specific f;
+
+    for (auto& iCluster : pfClusterJetRefVec) {
+      // std::cout << "\tiTriggerJet: " << iCalo << " pT= " << jetRefVec[iCalo]->pt() << std::endl;          
+      for (unsigned int iPF = 0; iPF < PFJets->size(); iPF++) {
+        const Candidate& myJet = (*PFJets)[iPF];
+        double deltaR = ROOT::Math::VectorUtil::DeltaR(myJet.p4().Vect(), (iCluster->p4()).Vect());
+        if (deltaR < DeltaR_) {
+          PFJet myPFJet(myJet.p4(), a, f);
+          pfjets->push_back(myPFJet);
+          break;
+        }
       }
     }
   }
+  
 
   // std::cout <<"Size of PF matched jets "<<pfjets->size()<<std::endl;
   iEvent.put(std::move(pfjets));

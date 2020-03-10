@@ -25,7 +25,7 @@ public:
 
 private:
   std::vector<reco::CaloJetRef> jetRefVec;
-
+  std::vector<reco::PFClusterJetRef> pfClusterJetRefVec;
   edm::EDGetTokenT<edm::View<reco::Candidate>> m_thePFJetToken;
   edm::EDGetTokenT<trigger::TriggerFilterObjectWithRefs> m_theTriggerJetToken;
 
@@ -33,5 +33,6 @@ private:
   edm::InputTag CaloJetFilter;
   double DeltaR_;  // DeltaR(HLT,L1)
   int TriggerType_;
+  bool useCaloJets_;
 };
 #endif

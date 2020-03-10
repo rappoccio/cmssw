@@ -26,6 +26,7 @@
 #include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
+#include "DataFormats/JetReco/interface/PFClusterJetCollection.h"
 #include "DataFormats/Candidate/interface/CompositeCandidateFwd.h"
 #include "DataFormats/METReco/interface/METFwd.h"
 #include "DataFormats/METReco/interface/CaloMETFwd.h"
@@ -61,6 +62,7 @@ namespace trigger {
   typedef std::vector<reco::ElectronRef> VRelectron;
   typedef std::vector<reco::RecoChargedCandidateRef> VRmuon;
   typedef std::vector<reco::CaloJetRef> VRjet;
+  typedef std::vector<reco::PFClusterJetRef> VRpfclusterjet;
   typedef std::vector<reco::CompositeCandidateRef> VRcomposite;
   typedef std::vector<reco::METRef> VRbasemet;
   typedef std::vector<reco::CaloMETRef> VRcalomet;
@@ -94,6 +96,8 @@ namespace trigger {
     VRmuon muonRefs_;
     Vids jetIds_;
     VRjet jetRefs_;
+    Vids pfClusterJetIds_;
+    VRpfclusterjet pfClusterJetRefs_;
     Vids compositeIds_;
     VRcomposite compositeRefs_;
     Vids basemetIds_;
@@ -583,6 +587,41 @@ namespace trigger {
       for (size_type i = begin; i != end; ++i) {
         if (id == jetIds_[i]) {
           refs[j] = jetRefs_[i];
+          ++j;
+        }
+      }
+      return;
+    }
+
+    void getObjects(Vids& ids, VRpfclusterjet& refs) const { getObjects(ids, refs, 0, pfClusterJetIds_.size()); }
+    void getObjects(Vids& ids, VRpfclusterjet& refs, size_type begin, size_type end) const {
+      assert(begin <= end);
+      assert(end <= pfClusterJetIds_.size());
+      const size_type n(end - begin);
+      ids.resize(n);
+      refs.resize(n);
+      size_type j(0);
+      for (size_type i = begin; i != end; ++i) {
+        ids[j] = pfClusterJetIds_[i];
+        refs[j] = pfClusterJetRefs_[i];
+        ++j;
+      }
+    }
+    void getObjects(int id, VRpfclusterjet& refs) const { getObjects(id, refs, 0, pfClusterJetIds_.size()); }
+    void getObjects(int id, VRpfclusterjet& refs, size_type begin, size_type end) const {
+      assert(begin <= end);
+      assert(end <= pfClusterJetIds_.size());
+      size_type n(0);
+      for (size_type i = begin; i != end; ++i) {
+        if (id == pfClusterJetIds_[i]) {
+          ++n;
+        }
+      }
+      refs.resize(n);
+      size_type j(0);
+      for (size_type i = begin; i != end; ++i) {
+        if (id == pfClusterJetIds_[i]) {
+          refs[j] = pfClusterJetRefs_[i];
           ++j;
         }
       }
@@ -1200,6 +1239,10 @@ namespace trigger {
     size_type jetSize() const { return jetIds_.size(); }
     const Vids& jetIds() const { return jetIds_; }
     const VRjet& jetRefs() const { return jetRefs_; }
+
+    size_type pfClusterJetSize() const { return pfClusterJetIds_.size(); }
+    const Vids& pfClusterJetIds() const { return pfClusterJetIds_; }
+    const VRpfclusterjet& pfClusterJetRefs() const { return pfClusterJetRefs_; }
 
     size_type compositeSize() const { return compositeIds_.size(); }
     const Vids& compositeIds() const { return compositeIds_; }
