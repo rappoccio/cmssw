@@ -27,6 +27,7 @@
   <class name="std::vector<reco::PFClusterJet>"/>
   <class name="edm::RefVector<std::vector<reco::PFClusterJet>,reco::PFClusterJet,edm::refhelper::FindUsingAdvance<std::vector<reco::PFClusterJet>,reco::PFClusterJet> >"/>
   <class name="edm::Ref<std::vector<reco::PFClusterJet>,reco::PFClusterJet,edm::refhelper::FindUsingAdvance<std::vector<reco::PFClusterJet>,reco::PFClusterJet> >"/>
+  <class name="std::vector<edm::Ref<std::vector<reco::PFClusterJet>,reco::PFClusterJet,edm::refhelper::FindUsingAdvance<std::vector<reco::PFClusterJet>,reco::PFClusterJet> > >"/> 
   <class name="edm::RefProd<std::vector<reco::PFClusterJet> >"/>
   <class name="edm::Wrapper<std::vector<reco::PFClusterJet> >"/>
   <class name="edm::Wrapper<reco::PFClusterJetRefVector>"/>
