@@ -144,7 +144,7 @@ class SimpleFlatTableProducer : public SimpleFlatTableProducerBase<T, edm::View<
             } else {
                 for (unsigned int i = 0, n = prod->size(); i < n; ++i) {
                     const auto & obj = (*prod)[i];
-                    if (cut_(obj)) { 
+		    if ( prod->ptrAt(i).isNonnull() && prod->ptrAt(i).isAvailable() && cut_(obj)) { 
                         selobjs.push_back(&obj); 
                         if (!extvars_.empty()) selptrs.emplace_back(prod->ptrAt(i));
                     }
