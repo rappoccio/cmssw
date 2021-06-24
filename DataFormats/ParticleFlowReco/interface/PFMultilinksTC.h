@@ -13,9 +13,18 @@ namespace reco {
   /// linker to store all found links.
   ///
   struct PFMultilink {
-    PFMultilink ( const reco::PFRecTrackRef & trackref, const reco::PFClusterRef & clusterref ) : trackRef(trackref), clusterRef(clusterref) {}
+    PFMultilink ( const reco::PFRecTrackRef & trackref, const reco::PFClusterRef & clusterref ) : 
+       trackRef(trackref), clusterRef(clusterref), clusterRef2() {}
+    PFMultilink ( const reco::PFClusterRef & clusterref1, const reco::PFClusterRef & clusterref2 ) : 
+       trackRef(), clusterRef(clusterref1), clusterRef2(clusterref2) {}
+
+    // Data are to link:
+    // Track to ECAL (trackRef --> clusterRef)
+    // Track to HCAL (trackRef --> clusterRef)
+    // PS to ECAL (clusterRef --> clusterRef2)
     reco::PFRecTrackRef trackRef;
     reco::PFClusterRef clusterRef;
+    reco::PFClusterRef clusterRef2;
   };
   /// collection of PFSuperCluster objects
   typedef edm::RefVector<std::vector<PFMultilink>> PFMultilinksType;

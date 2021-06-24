@@ -256,9 +256,9 @@ void KDTreeLinkerTrackHcal::updatePFBlockEltWithLinks() {
     // No restriction on the number of HCAL links per track or isLinkedToDisplacedVertex
     if (nMaxHcalLinksPerTrack_ < 0. || trackElt->isLinkedToDisplacedVertex()) {
       for (const auto& hcalElt : hcalEltSet) {
-        double clusterphi = hcalElt->clusterRef()->positionREP().phi();
-        double clustereta = hcalElt->clusterRef()->positionREP().eta();
-        multitracks.linkedClusters.push_back(std::make_pair(clusterphi, clustereta));
+
+	reco::PFMultilink multiLink( trackElt->trackRef(), hcalElt->clusterRef() );
+	multitracks.linkedClusters.push_back(multiLink);
 
         // We set the multilinks flag of the track (for links to ECAL) to true. It will allow us to
         // use it in an optimized way in prefilter

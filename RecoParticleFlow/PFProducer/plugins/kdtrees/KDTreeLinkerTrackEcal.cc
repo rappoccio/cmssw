@@ -247,10 +247,9 @@ void KDTreeLinkerTrackEcal::updatePFBlockEltWithLinks() {
     for (const auto &trackElt : trackEltSet) {
       const reco::PFRecTrackRef &trackref = trackElt->trackRefPF();
       const reco::PFTrajectoryPoint &atECAL = trackref->extrapolatedPoint(reco::PFTrajectoryPoint::ECALShowerMax);
-      double tracketa = atECAL.positionREP().eta();
-      double trackphi = atECAL.positionREP().phi();
 
-      multitracks.linkedClusters.push_back(clusterref);
+      reco::PFMultilink multiLink( trackref, ecalElt->clusterRef() );
+      multitracks.linkedClusters.push_back(multiLink);
 
       // We set the multilinks flag of the track (for links to ECAL) to true. It will allow us to
       // use it in an optimized way in prefilter

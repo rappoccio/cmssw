@@ -61,13 +61,11 @@ double PreshowerAndECALLinker::testLink(const reco::PFBlockElement* elem1, const
     const reco::PFCluster::REPPoint& ecalreppos = ecalref->positionREP();
     const math::XYZPoint& ecalxyzpos = ecalref->position();
     const math::XYZPoint& psxyzpos = psref->position();
-    const double ecalPhi = ecalreppos.Phi();
-    const double ecalEta = ecalreppos.Eta();
 
     // Check if the link PS/Ecal exist
     reco::PFMultilinksType::const_iterator mlit = multilinks.begin();
     for (; mlit != multilinks.end(); ++mlit)
-      if ((mlit->first == ecalPhi) && (mlit->second == ecalEta))
+      if ((*mlit)->clusterRef == ecalref )
         break;
 
     // If the link exist, we fill dist and linktest.

@@ -241,8 +241,9 @@ void KDTreeLinkerPSEcal::updatePFBlockEltWithLinks() {
       double clusterphi = ecalElt->clusterRef()->positionREP().phi();
       double clustereta = ecalElt->clusterRef()->positionREP().eta();
 
-      multitracks.linkedClusters.push_back(std::make_pair(clusterphi, clustereta));
-
+      reco::PFMultilink multiLink( psElt->clusterRef(), ecalElt->clusterRef() );
+      multitracks.linkedClusters.push_back(multiLink);
+      
       // We set the multilinks flag of the ECAL element (for links to PS) to true. It will allow us to
       // use it in an optimized way in prefilter
       ecalElt->setIsValidMultilinks(true, _targetType);
